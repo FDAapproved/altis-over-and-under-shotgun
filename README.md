@@ -16,9 +16,8 @@ Configurations:
 				aslug,         - 0-1, oslug + uslug,
 Quirks:			doubled accuracy, does not auto-eject unspent shells,
 				retains doublefire from the slayer, can slamfire. 
-
-Description:
-	The Altis is intended as a slow and accurate alternative to the Slayer doublebarreled shotgun, and is ideally used from well defended positions. Unlike the Slayer, the Altis has manual, partial reloads, allowing the shooter to mix ammunition types, or choose to load only the over/under barrels. 
-Field Notes:
-	When loaded with only slugs, the Altis nearly depletes a Hell-Knight's shields entirely with one doubleshot. The increased accuracy makes buckshot especially deadly against squishy targets from longer ranges.
 ```
+## Description:
+	The Altis is intended as a slow and accurate alternative to the Slayer doublebarreled shotgun, and is ideally used from well defended positions. Unlike the Slayer, the Altis has manual, partial reloads, allowing the shooter to mix ammunition types, or choose to load only the over/under barrels. 
+## Field Notes:
+	When loaded with only slugs, the Altis nearly depletes a Hell-Knight's shields entirely with one doubleshot. The increased accuracy makes buckshot especially deadly against squishy targets from longer ranges.
