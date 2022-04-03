@@ -1,6 +1,6 @@
 # Altis O/U Shotgun
  A weapon addon for the gzdoom gameplay mod 'Hideous Destructor'.
- Sourced from Gollgagh's O/U shotgun.
+ Sourced from [Gollgagh's O/U shotgun.](https://forum.zdoom.org/viewtopic.php?t=59120)
 # Weapon Description
 ```
 Name:           "Altis" over-and-under shotgun,
