@@ -1,0 +1,187 @@
+// Random classes with ammo boxes. 
+class WildAltisSlugs : IdleDummy
+{
+	states
+	{
+		Spawn:
+			TNT1 A 0 NODELAY
+			{
+				let weapon = HDWeapon(Actor.Spawn("hdaltis", (invoker.pos.x, invoker.pos.y, invoker.pos.z + 5)));
+				// Filled with slugs. 
+				if(weapon)
+				{
+					weapon.weaponstatus[1]=4;
+					weapon.weaponstatus[2]=4;
+				}
+				SlugBoxPickup(Actor.Spawn("SlugBoxPickup", (invoker.pos.x, invoker.pos.y, invoker.pos.z + 5)));
+			}
+			stop;
+	}
+}
+class WildAltisShells : IdleDummy
+{
+	states
+	{
+		Spawn:
+			TNT1 A 0 NODELAY
+			{
+				let weapon = Actor.Spawn("hdaltis", (invoker.pos.x, invoker.pos.y, invoker.pos.z + 5));
+				ShellBoxPickup(Actor.Spawn("ShellBoxPickup", (invoker.pos.x, invoker.pos.y, invoker.pos.z + 5)));
+			}
+			stop;
+	}
+}
+
+
+class OverUnderEvent : EventHandler
+{
+
+
+
+	// Inits to false when a map is first loaded. 
+	private bool cvarsAvailable;
+	
+	
+	
+	// Could these be in a list? Probably,
+	// but the cvars already take up unique names. 
+	private int weaponSpawnBiasActual;
+	private int slugSpawnBiasActual;
+	
+	
+	
+	// Shoves cvar values into their non-cvar shaped holes.
+	// I have no idea why names for cvars become reserved here.
+	// But, this works. So no complaints. 
+	void init()
+	{
+		cvarsAvailable = true;
+		weaponSpawnBiasActual = ous_weapon_spawn_bias;
+		slugSpawnBiasActual   = ous_slug_chance_bias;
+	}
+
+
+
+	// 'Initalizes' the event handler,
+	// In my testing, this is called after events are fired. 
+	override void WorldLoaded(WorldEvent e)
+	{
+		// always calls init anyways. It's what other worldloaded's do. 
+		init();
+		super.WorldLoaded(e);
+	}
+
+
+
+	// Randomizer function, uses one cvar per spawn rate. 
+	bool giverandom(int chance)
+	{
+		bool result = false;
+		
+		
+		// temp storage for the random value. 
+		int iii = random(0, chance);
+
+
+		// Checks to see if the cvar is disabled. 
+		if (iii < 1)
+		{
+			// Zero is true, anything else is false. 
+			if(chance > -1)
+				result = true;
+		}
+		
+		return result;
+	}
+	
+	
+	void AmmoListUpdate(Worldevent e)
+	{
+		// Seperate ammo handler. 
+		let undertale = HDAmmo(e.Thing); 	
+		if(undertale)
+		{ 			
+			switch(undertale.GetClassName())
+			{
+				case 'HDSlugAmmo':
+				case 'HDShellAmmo':
+					undertale.ItemsThatUseThis.Push("hdaltis");
+					break;
+			}
+		}
+	}
+	
+	
+	
+	void WeaponSpawnRandom(ReplaceEvent e)
+	{	
+		// For weapon spawns,
+		// works with other mods. 
+		if(e.replacement is "SSGReplaces" && !(e.replacement is "hdaltis"))
+		{
+			if(giverandom(weaponSpawnBiasActual))
+			{
+				if(giverandom(slugSpawnBiasActual))
+				{
+					e.replacement = ('WildAltisSlugs');
+				}
+				else
+				{
+					e.replacement = ('WildAltisShells');
+				}
+				e.isfinal = false;
+			}
+		}
+	}
+	
+	
+	
+	
+	// Handles 'item propegation'. Woo, fancy. 
+	override void CheckReplacement(ReplaceEvent e)
+	{
+		// Makes sure the values are always loaded before
+		// taking in replaceevents. 
+		if(!cvarsAvailable)
+			init();
+		
+		// Don't replace if it's final, or doesn't exist. 
+		if (!e.Replacement || e.IsFinal)
+		{
+			return;
+		}
+		
+		WeaponSpawnRandom(e);
+	
+	}
+	
+	// Onto the altar go your offerings... 
+	override void WorldThingSpawned(WorldEvent e)
+	{ 
+		// Makes sure the values are always loaded before
+		// taking in events.
+		if(!cvarsAvailable)
+			init();
+		
+		// in case it's not real. 
+		if(!e.Thing)
+		{
+			return;
+		}
+		else
+		{
+			// In case the thing in question is owned by someone.
+			// We check for this since a variable like e.isfinal
+			// doesn't exist for worldthingspawned :(
+			if(e.Thing is "Inventory" && Inventory(e.Thing).Owner)
+			{
+				// Ammo owned has to have it's list updated.
+				AmmoListUpdate(e);
+				return;
+			}
+			
+			// Updates the item if it's an ammo. 
+			AmmoListUpdate(e);
+		}
+	}
+}

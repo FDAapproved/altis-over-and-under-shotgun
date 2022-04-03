@@ -1,0 +1,18 @@
+// For resounds.
+weapons/ousingle oufire1
+$limit weapons/ousingle 0
+
+weapons/ouslug dshtfire
+$limit weapons/ouslug 0
+
+weapons/oucrack SHTGGET
+$limit weapons/oucrack 0
+
+weapons/ouopen ouopen
+$limit weapons/ouopen 0
+
+weapons/ouclose ouclose
+$limit weapons/ouclose 0
+
+world/oufar dsshtfar 
+$limit world/oufar 0

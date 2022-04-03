@@ -1,0 +1,1107 @@
+// -----------------------------------------------------------------------------
+// It's not over 'till it's under.
+// -----------------------------------------------------------------------------
+class HDAltis : HDShotgun
+{
+	// Button pressed when firing. 
+	int pff;
+	
+	// Cooldown for reloading actions.
+	int cooldown;
+	
+	// For whether or not the weapon is open.
+	bool reloading;
+	
+	// barrelswap, maps just like the slayer's. 
+	transient cvar swapbarrels;
+	
+	// Included to fix spareweapon bugs. 
+	override bool AddSpareWeapon(actor newowner){return AddSpareWeaponRegular(newowner);}
+	override hdweapon GetSpareWeapon(actor newowner,bool reverse,bool doselect){return GetSpareWeaponRegular(newowner,reverse,doselect);}
+	
+	default
+	{
+		//$Category "Weapons/Hideous Destructor/Shotguns"
+		//$Title "Altis"
+		//$Sprite "GOLLA0"
+
+		-hdweapon.fitsinbackpack
+		weapon.selectionorder 31;
+		weapon.slotnumber 3;
+		weapon.slotpriority 1;
+		inventory.pickupmessage "You got the Altis!";
+		obituary "By Zeus; %k, %o is over (and under (the ground)).";
+		weapon.bobrangex 0.18;
+		weapon.bobrangey 0.7;
+		scale 0.6;
+		hdweapon.barrelsize 30,1,1;
+		tag "over-and-under shotgun";
+		hdweapon.refid "ous";
+		
+		// Loadout info string. Comment this out for older HD versions to run.
+		hdweapon.loadoutcodes "
+			\cuochoke, uchoke - 0-7, 0 skeet, 7 full
+			\cuoslug, uslug  - 0-1, 0 shell, 1 slug
+			\cuaslug, - 0-1, oslug + uslug";
+	}
+	
+	// Resets some internal value(s) when being detached. 
+	override void DetachFromOwner()
+	{
+		reloading = false;
+		cooldown  = 0;
+		pff       = 0;
+		hdweapon.detachfromowner();
+	}
+	
+	// Since the slayer doesn't unload it's chamber.
+	override void failedpickupunload(){}
+
+
+	bool isempty()
+	{
+		return (!bool(weaponstatus[OUSS_CHAMBER1]) && !bool(weaponstatus[OUSS_CHAMBER2]));
+	}
+
+
+	// Returns true when the weapon is not full. 
+	bool isnotfull()
+	{
+		return !(bool(weaponstatus[OUSS_CHAMBER1]) && bool(weaponstatus[OUSS_CHAMBER2]));
+	}
+	
+	
+	// returns true when the weapon is full.
+	bool isfull()
+	{
+		return !(bool(weaponstatus[OUSS_CHAMBER1]%2)) && !(bool(weaponstatus[OUSS_CHAMBER2]%2));
+	}
+	
+	// Values swapped while the weapon is open.
+	action void a_open()
+	{
+		invoker.barrellength = 1;
+		invoker.reloading = true;
+		A_SetHelpText();
+	}
+	
+	// Values swapped when the weapon closes. 
+	action void a_close()
+	{
+		invoker.barrellength = 30;
+		invoker.reloading = false;
+		A_SetHelpText();
+		invoker.owner.A_StartSound("weapons/ouclose", CHAN_WEAPON);
+	}
+
+	
+	// Fills an empty weapon slot.
+	// Holding zoom is what causes backfirst to be true.
+	action void a_fillslot(int code, bool backfirst)
+	{
+		if(backfirst)
+		{
+			if(!(invoker.weaponstatus[OUSS_CHAMBER2]))
+				invoker.weaponstatus[OUSS_CHAMBER2] = code;
+			else if(!invoker.weaponstatus[OUSS_CHAMBER1])
+				invoker.weaponstatus[OUSS_CHAMBER1] = code;
+		}
+		else
+		{
+			if(invoker.weaponstatus[OUSS_CHAMBER1] == 0)
+			{
+				invoker.weaponstatus[OUSS_CHAMBER1] = code;
+			}
+			else if(invoker.weaponstatus[OUSS_CHAMBER2] == 0)
+			{
+				invoker.weaponstatus[OUSS_CHAMBER2] = code;
+			}
+		}
+		
+	}
+	
+	
+	// The readyweapon code used while you have the shotgun open. 
+	action void A_ReadyOpen()
+	{
+		
+		// Actual ready call.
+		A_WeaponReady(WRF_NOFIRE|WRF_ALLOWUSER3);
+		
+		// Weapon cooldown (can't mash reload). 
+		if(invoker.cooldown>0)
+		{
+			invoker.cooldown--;
+		}
+		else
+		{
+			
+			// Quality of life reload-ends. 
+			if((justpressed(BT_RELOAD) && !(invoker.owner.countinv("HDShellammo"))) || (justpressed(BT_ALTRELOAD) && !(invoker.owner.countinv("HDSlugammo"))))
+			{
+				invoker.cooldown += 35;
+				setweaponstate("reloadend");
+				return;
+			}
+			else if((justpressed(BT_RELOAD) || justpressed(BT_ALTRELOAD)) && !invoker.isnotfull())
+			{
+				invoker.cooldown += 35;
+				setweaponstate("reloadend");
+				return;
+			}
+		
+			// Revolver style reload end (allows slamfire). 
+			if(justpressed(BT_ATTACK) || justpressed(BT_ALTATTACK))
+			{
+				invoker.cooldown += 15;
+				setweaponstate("reloadend");
+			}
+			// Shell reload.
+			else if(justpressed(BT_RELOAD))
+			{
+				if(invoker.owner.countinv("HDShellammo") && invoker.isnotfull())
+				{
+					invoker.cooldown += 15;
+					if(invoker.owner.health < 70)
+					{
+						invoker.cooldown += 5;
+					}
+					setweaponstate("reloadactual");
+				}
+				else
+					setweaponstate("nope");
+			}
+			// Slug reload.
+			else if(justpressed(BT_ALTRELOAD))
+			{
+				if(invoker.owner.countinv("HDSlugammo") && invoker.isnotfull())
+				{
+					invoker.cooldown += 15;
+					if(invoker.owner.health < 70)
+					{
+						invoker.cooldown += 5;
+					}
+					setweaponstate("altreloadactual");
+				}
+				else
+					setweaponstate("nope");
+			}
+			// Shell Ejection
+			else if(justpressed(BT_UNLOAD))
+			{
+				if(!invoker.cooldown)
+				{
+					invoker.cooldown += 25;
+					setweaponstate("unloadactual");
+				}
+				else
+				{
+					setweaponstate("nope");
+				}
+			}
+		}
+
+
+	}
+	
+	
+	// Maps the frame to whatever's in the O/U shotgun, regardless of number. 
+	action int a_getreloadframe()
+	{
+		return int(bool(invoker.weaponstatus[OUSS_CHAMBER1]) + (int(bool(invoker.weaponstatus[OUSS_CHAMBER2])) * 2));
+	}
+	
+	
+	// For cheats.
+	override void ForceBasicAmmo()
+	{
+		owner.A_SetInventory("HDShellAmmo",10);
+		owner.A_SetInventory("HDSlugAmmo",10);
+	}
+	
+	// For pressing the droponeammo key. 
+	override void DropOneAmmo(int amt)
+	{
+		if(owner)
+		{
+			amt=clamp(amt,1,10);
+			owner.A_DropInventory("HDShellAmmo",amt*2);
+			owner.A_DropInventory("HDSlugAmmo",amt*2);
+		}
+	}
+
+
+	// Maps firecodes to fire statements. 
+	// More complicated than it ever needed to be, but it works. 
+	virtual void A_SuperFire(actor caller, int firecode, int choke=7)
+	{
+			bool firetop    = false;
+			bool firebottom = false;
+			
+			// Maps to booleans defined above. 
+			switch(firecode)
+			{
+				case 0:
+					firetop=true;
+					break;
+				case 1:
+					firebottom=true;
+					break;
+				case 2:
+					firetop=true;
+					firebottom=true;
+					break;
+			}
+			
+			// Codes for what bullets to fire. 
+			int tofiretop    = weaponstatus[OUSS_CHAMBER1];
+			int tofirebottom = weaponstatus[OUSS_CHAMBER2];
+			
+			// Handles calling subfunctions for firing. 
+			if(firetop)
+			{
+				if(tofiretop==OUSS_SHELL)
+				{
+					Fire(caller, 0, choke);
+					weaponstatus[OUSS_CHAMBER1] -= 1;
+				}
+				else if(tofiretop==OUSS_SLUG)
+				{
+					FireSlug(caller, 0, choke);
+					weaponstatus[OUSS_CHAMBER1] -= 1;
+				}
+			}
+			if(firebottom)
+			{
+				if(tofirebottom==OUSS_SHELL)
+				{
+					Fire(caller, 1, choke);
+					weaponstatus[OUSS_CHAMBER2] -= 1;
+				}
+				else if(tofirebottom==OUSS_SLUG)
+				{
+					FireSlug(caller, 1, choke);
+					weaponstatus[OUSS_CHAMBER2] -= 1;
+				}
+			}
+	}
+
+
+	
+	// Fires slugs. More or less a carbon copy of the slayer's firecode.
+	// The altis has a hardcoded accuracy modifier, it's twice as accurate. 
+	static void FireSlug(actor caller,bool top,int choke=7)
+	{
+		double shotpower=getshotpower();
+		double spread=3.;
+		double speedfactor=1.2;
+		let sss=HDAltis(caller.findinventory("HDAltis"));
+		if(sss){
+			choke=sss.weaponstatus[top?OUSS_CHOKE2:OUSS_CHOKE1];
+			sss.shotpower=shotpower;
+		}
+
+		choke=clamp(choke,0,7);
+		spread=6.5-0.5*choke;
+		speedfactor=1.+0.02857*choke;
+
+		spread*=shotpower;
+		speedfactor*=shotpower;
+		int barreladjust=2;
+		if(top)barreladjust=-barreladjust;
+		
+		// Here is where the bullet actor decision would go. 
+		let p=HDBulletActor.FireBullet(
+		caller,
+		"HDB_Slug",
+			zofs:
+			HDWeapon.GetShootOffset(
+			caller,caller.player
+			&&!!hdweapon(caller.player.readyweapon)
+			?hdweapon(caller.player.readyweapon).barrellength:36
+			) + barreladjust,
+			spread:spread*0.5,
+			speedfactor:speedfactor,amount:1
+		);
+		distantnoise.make(p,"world/oufar");
+	}
+
+	
+	// Fires shells. More or less a carbon copy of the slayer's firecode.
+	// The altis has a hardcoded accuracy modifier, it's twice as accurate. 
+	static void Fire(actor caller,bool top,int choke=7)
+	{
+		double shotpower=getshotpower();
+		double spread=3.;
+		double speedfactor=1.2;
+		
+		// Checks if the caller has the weapon. 
+		let sss=HDAltis(caller.findinventory("HDAltis"));
+		if(sss)
+		{
+			choke=sss.weaponstatus[top?OUSS_CHOKE2:OUSS_CHOKE1];
+			sss.shotpower=shotpower;
+		}
+		choke=clamp(choke,0,7);
+		spread=6.5-0.5*choke;
+		speedfactor=1.+0.02857*choke;
+
+		spread*=shotpower;
+		speedfactor*=shotpower;
+		
+		int barreladjust=2;
+		if(top)barreladjust=-barreladjust;
+		
+		// Here is where the bullet actor decision would go. 
+		HDBulletActor.FireBullet(
+		caller,"HDB_wad",
+			zofs:
+			HDWeapon.GetShootOffset(
+			caller,caller.player
+			&&!!hdweapon(caller.player.readyweapon)
+			?hdweapon(caller.player.readyweapon).barrellength:36
+			) + barreladjust,
+			spread:spread*0.5);
+		let p=HDBulletActor.FireBullet(
+		caller,"HDB_00",
+			zofs:
+			HDWeapon.GetShootOffset(
+			caller,caller.player
+			&&!!hdweapon(caller.player.readyweapon)
+			?hdweapon(caller.player.readyweapon).barrellength:36
+			) + barreladjust,
+			spread:spread*0.5,
+			speedfactor:speedfactor,amount:10
+		);
+		distantnoise.make(p,"world/oufar");
+	}
+	
+	// Altis has no unique sprites or saddles.
+	override string,double getpickupsprite(){return "GOLLN".."0",1.;}
+	
+	// GUI taken from the slayer, with some mapping tweaks. 
+	override void DrawHUDStuff(HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl){
+		if(sb.hudlevel==1)
+		{
+		
+			sb.drawimage("SLG1A0",(-59,-10),sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawnum(hpl.countinv("HDSlugAmmo"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM);
+			
+			sb.drawimage("SHL1A0",(-47,-10),sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawnum(hpl.countinv("HDShellAmmo"),-46,-8,sb.DI_SCREEN_CENTER_BOTTOM);
+		}
+		int loffs=-31;int rofs=-18;
+		if(hdw.weaponstatus[0]&OUSF_DOUBLE){
+			loffs=-27;rofs=-23;
+			sb.drawimage("STBURAUT",(-23,-17),sb.DI_SCREEN_CENTER_BOTTOM);
+		}
+		
+		int chambertop    = hdw.weaponstatus[OUSS_CHAMBER1];
+		int chamberbottom = hdw.weaponstatus[OUSS_CHAMBER2];
+		if(!(chambertop%2))
+		{
+			switch(chambertop)
+			{
+				case OUSS_SHELL:
+					sb.drawrect(loffs,-15,3,5);
+					sb.drawrect(loffs,-9,3,2);
+					break;
+				case OUSS_SLUG:
+					sb.drawrect(loffs,-15,3,5);
+					sb.drawrect(loffs,-9,3,2);
+					sb.drawrect(loffs+1,-16,1,1);
+					break;
+			}
+		}
+		else if(chambertop>0)
+		{
+			sb.drawrect(loffs,-9,3,2);
+		}
+		
+		if(!(chamberbottom%2))
+		{
+			switch(chamberbottom)
+			{
+				case OUSS_SHELL:
+					sb.drawrect(rofs,-15,3,5);
+					sb.drawrect(rofs,-9,3,2);
+					break;
+				case OUSS_SLUG:
+					sb.drawrect(rofs,-15,3,5);
+					sb.drawrect(rofs,-9,3,2);
+					sb.drawrect(rofs+1,-16,1,1);
+					break;
+			}
+
+		}
+		else if(chamberbottom>0)
+		{
+			sb.drawrect(rofs,-9,3,2);
+		}
+	}
+	
+	// Helptext for when the breach is open and closed. 
+	override string gethelptext()
+	{
+		if(!reloading)
+		{
+			return
+			WEPHELP_FIRE.."  Shoot Over (choke: "..weaponstatus[OUSS_CHOKE1]..")\n"
+			..WEPHELP_ALTFIRE.."  Shoot Under (choke: "..weaponstatus[OUSS_CHOKE2]..")\n"
+			..WEPHELP_FIREMODE.."  Hold to force double shot\n"
+			..WEPHELP_RELOAD..", "..WEPHELP_ALTRELOAD..", "..WEPHELP_UNLOAD..", "" Open breach"
+			;
+		}
+		else
+		{
+			return
+			WEPHELP_FIRE..", "..WEPHELP_ALTFIRE.."  Close breach\n"
+			..WEPHELP_RELOAD.."  Reload w/ shells\n"
+			..WEPHELP_ALTRELOAD.."  Reload w/ slugs\n"
+			..WEPHELP_ZOOM.." Hold to load underbarrel first\n"
+			..WEPHELP_UNLOAD.." Eject unspent shells"
+			;
+		}
+	}
+	
+	// Basic ironsights; invisible while reloading. 
+	override void DrawSightPicture(
+		HDStatusBar sb,HDWeapon hdw,HDPlayerPawn hpl,
+		bool sightbob,vector2 bob,double fov,bool scopeview,actor hpc
+	)
+	{
+		if(!reloading)
+		{
+			int cx,cy,cw,ch;
+			[cx,cy,cw,ch]=screen.GetClipRect();
+			sb.SetClipRect(
+				-16+bob.x,-4+bob.y,32,12,
+				sb.DI_SCREEN_CENTER
+			);
+			vector2 bobb=bob*2;
+			bobb.y=clamp(bobb.y,-8,8);
+			vector2 moveoffset = (0, 5);
+			sb.drawimage(
+				"ouftst",(0,-4)+moveoffset+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
+				alpha:0.9,scale:(1,1)
+			);
+			sb.SetClipRect(cx,cy,cw,ch);
+			sb.drawimage(
+				"oubkst",(0,0)+moveoffset+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
+			);
+		}
+	}
+	
+	// The original slayer had complicated logic to give you a hunter instead.
+	// Since this has unique sprites, we don't need that. 
+	override void PostBeginPlay()
+	{
+		super.postbeginplay();
+		weaponspecial = 1337;
+	}
+	
+	// Static gunmass and weaponbulk, as the slayer
+	// only is heavier if you load the saddles. 
+	override double gunmass()
+	{
+		return 7;
+	}
+	override double weaponbulk()
+	{
+		return 150;
+	}
+	
+	states
+	{
+	
+		select0:
+			GOLL A 0
+			{
+				invoker.reloading=false;
+				invoker.swapbarrels=cvar.getcvar("hd_swapbarrels",player);
+			}
+			goto select0small;
+		
+		// Technically faster than closing it outright.
+		// Good luck living long if you jump around to reload though. 
+		deselect0:
+			GOLL A 0
+			{
+				invoker.pff      = 0;
+				invoker.cooldown = 0;
+				if(invoker.reloading)
+				{
+					A_SetTics(8);
+					invoker.a_close();
+				}
+			}
+			goto deselect0small;
+		
+		// Landing pads for fire and altfire. 
+		fire:
+		altfire:
+			#### A 0 A_ClearRefire();
+	
+	// Branches into readyopen, handles fire button code.
+	ready:
+		GOLL # 0 A_JumpIf(invoker.reloading, "reloadloop");
+		GOLL # 1
+		{	
+			
+			if(invoker.cooldown > 0)
+			{
+				invoker.cooldown--;
+			}
+			invoker.pff = 0;
+			if(PressingFireMode())
+			{
+				invoker.weaponstatus[0]|=OUSF_DOUBLE;
+				
+				// In case you're also pressing reload or alt-reload. 
+				if(pressingreload())
+				{
+					invoker.weaponstatus[0]&=~OUSF_DOUBLE;
+					setweaponstate("reload");
+					return;
+				}
+				else if(pressingaltreload())
+				{
+					invoker.weaponstatus[0]&=~OUSF_DOUBLE;
+					setweaponstate("altreload");
+					return;
+				}
+			}
+			// Unsets double firing otherwise. 
+			else
+				invoker.weaponstatus[0]&=~OUSF_DOUBLE;
+
+
+			// Swaps the value of fire and alt-fire. 
+			if(invoker.swapbarrels&&invoker.swapbarrels.getbool())
+			{
+				invoker.pff=PressingAltfire();
+				if(PressingFire())
+					invoker.pff|=2;
+			}else
+			{
+				invoker.pff=PressingFire();
+				if(PressingAltfire())
+					invoker.pff|=2;
+			}
+
+			// Booleans for the chambers.
+			// Even values are shells, uneven are spent. 
+			bool ch1=!(invoker.weaponstatus[OUSS_CHAMBER1]%2) && invoker.weaponstatus[OUSS_CHAMBER1] != 0;
+			bool ch2=!(invoker.weaponstatus[OUSS_CHAMBER2]%2) && invoker.weaponstatus[OUSS_CHAMBER2] != 0;
+
+			// Doubleshot. 
+			bool dbl=invoker.weaponstatus[0]&OUSF_DOUBLE;
+			
+			
+			if(ch1&&ch2)
+			{
+				if(invoker.pff==3)
+				{
+					A_Overlay(PSP_FLASH,"flashboth");
+					return;
+				}
+				else if(invoker.pff&&dbl)
+				{
+					setweaponstate("double");
+					return;
+				}
+			}
+			else if(invoker.pff&&dbl)
+			{
+				if(ch1)
+					A_Overlay(11,"flashleft");
+				if(ch2)
+					A_Overlay(12,"flashright");
+			}
+			
+			if(ch1&&invoker.pff%2)
+				A_Overlay(11,"flashleft");
+			else if(ch2&&invoker.pff>1)
+				A_Overlay(12,"flashright");
+			// If none of this is true, the weapon is regularly ready. 
+			else
+				A_WeaponReady((WRF_ALL|WRF_NOFIRE)&~WRF_ALLOWUSER2);
+		}
+		#### # 0 A_WeaponReady();
+		goto readyend;
+	
+	
+	double:
+		#### A 1 offset(0,34);
+		#### A 1 offset(0,33);
+		#### A 0 A_Overlay(PSP_FLASH,"flashboth");
+		goto readyend;
+
+	flashleft:
+		GOLF A 1 bright
+		{
+			// Codes for what bullets to fire. 
+			int tofiretop    = invoker.weaponstatus[OUSS_CHAMBER1];
+
+			
+
+			if(tofiretop==OUSS_SHELL)
+			{
+				A_StartSound("weapons/ousingle",CHAN_WEAPON,CHANF_OVERLAP);
+			}
+			else if(tofiretop==OUSS_SLUG)
+			{
+				A_StartSound("weapons/ouslug",CHAN_WEAPON,CHANF_OVERLAP);
+			}
+			A_Light2();
+			HDFlashAlpha(64,false,overlayid());
+			A_ZoomRecoil(0.9);
+			invoker.A_SuperFire(self, 0);
+		}
+		TNT1 A 1
+		{
+			A_Light0();
+			double shotpower=invoker.shotpower;
+			A_MuzzleClimb(0.2*shotpower,-2.2*shotpower,0.2*shotpower,-2.2*shotpower);
+		}
+		goto flasheither;
+	flashright:
+		GOLF B 1 bright
+		{
+			// Codes for what bullets to fire. 
+			int tofirebottom = invoker.weaponstatus[OUSS_CHAMBER2];
+
+		
+
+			if(tofirebottom==OUSS_SHELL)
+			{
+				A_StartSound("weapons/ousingle",CHAN_WEAPON,CHANF_OVERLAP);
+
+			}
+			else if(tofirebottom==OUSS_SLUG)
+			{
+				A_StartSound("weapons/ouslug",CHAN_WEAPON,CHANF_OVERLAP);
+			}
+
+			A_Light2();
+			HDFlashAlpha(64,false,overlayid());
+			A_ZoomRecoil(0.9);
+			invoker.A_SuperFire(self, 1);
+		}
+		TNT1 A 1
+		{
+			A_Light0();
+			double shotpower=invoker.shotpower;
+			A_MuzzleClimb(0.2*shotpower,-2.4*shotpower,0.2*shotpower,-2.4*shotpower);
+		}
+		goto flasheither;
+		
+	flasheither:
+		TNT1 A 0 A_AlertMonsters();
+		TNT1 A 0 setweaponstate("recoil");
+		stop;
+		
+	flashboth:
+		GOLF C 1 bright
+		{
+			// Codes for what bullets to fire. 
+			int tofiretop    = invoker.weaponstatus[OUSS_CHAMBER1];
+			int tofirebottom = invoker.weaponstatus[OUSS_CHAMBER2];
+
+			
+			if(tofiretop==OUSS_SHELL)
+			{
+				A_StartSound("weapons/ousingle",CHAN_WEAPON,CHANF_OVERLAP);
+			}
+			else if(tofiretop==OUSS_SLUG)
+			{
+				A_StartSound("weapons/ouslug",CHAN_WEAPON,CHANF_OVERLAP);
+			}
+		
+			if(tofirebottom==OUSS_SHELL)
+			{
+				A_StartSound("weapons/ousingle",CHAN_WEAPON,CHANF_OVERLAP);
+
+			}
+			else if(tofirebottom==OUSS_SLUG)
+			{
+				A_StartSound("weapons/ouslug",CHAN_WEAPON,CHANF_OVERLAP);
+			}
+			
+
+			A_Light2();
+			HDFlashAlpha(128);
+			A_ZoomRecoil(0.7);
+			invoker.A_SuperFire(self, 2);
+
+		}
+		TNT1 A 1
+		{
+			A_Light0();
+			double shotpower=invoker.shotpower;
+			double mlt=0.6*shotpower;
+			double mlt2=-3.*shotpower;
+			A_MuzzleClimb(mlt,mlt2,mlt,mlt2);
+		}
+		goto flasheither;
+	
+	
+	recoil:
+		#### K 1;
+		goto ready;
+
+	reloadloop:
+		// Maps the current reload sprite frame,
+		// could've been overlays, but I made the sprites
+		// as whole graphics so we're stuck with this. 
+		GOLR # 0
+		{
+			switch(invoker.a_getreloadframe())
+			{
+				default:
+					setweaponstate("reloadloopA");
+					return;
+				case 1:
+					setweaponstate("reloadloopB");
+					return;
+				case 2:
+					setweaponstate("reloadloopC");
+					return;
+				case 3:
+					setweaponstate("reloadloopD");
+					return;
+			}
+		}
+		reloadloopA:
+				GOLR A 0;
+				goto reloadloopend;
+		reloadloopB:
+				GOLR B 0;
+				goto reloadloopend;
+		reloadloopC:
+				GOLR C 0;
+				goto reloadloopend;
+		reloadloopD:
+				GOLR D 0;
+				goto reloadloopend;
+		// Actual readycode. 
+		reloadloopend:
+			GOLR # 1 a_readyopen();
+			goto readyend;
+	
+	// Ends a reload.
+	// Slightly slower if you're in shock. 
+	reloadend:
+		GOLL G 4 offset(0,46)
+		{
+			if(invoker.owner.health < 70)
+			{
+				a_settics(6);
+			}
+		}
+		GOLL G 2 offset(0,42)
+		{
+			if(invoker.owner.health < 70)
+			{
+				a_settics(4);
+			}
+		}
+		GOLL A 6 offset(0,42)
+		{
+			if(invoker.owner.health < 70)
+			{
+				a_settics(8);
+			}
+			A_MuzzleClimb(
+			-frandom(0.6,1.2)/2,-frandom(0.6,1.2)/2,
+			-frandom(0.6,1.2)/2,-frandom(0.6,1.2)/2,
+			-frandom(1.2,2.4)/2,-frandom(1.2,2.4)/2
+			);
+			a_close();
+		}
+		goto readyend;
+	
+	// Landingpad for reloading,
+	// has a failsafe that prevents you from opening as soon
+	// as you close the gun. 
+	reload:
+	altreload:
+	unload:
+		#### # 0
+		{
+			if(invoker.cooldown>0)
+			{
+				setweaponstate("readyend");
+			}
+		}
+		GOLL K 2 offset(0,34);
+		GOLL K 1 offset(0,40);
+		GOLL G 3 offset(0,46);
+		GOLL G 10 offset(0,47) A_StartSound("weapons/oucrack",8);
+		GOLR A 0;
+		GOLR B 0;
+		GOLR C 0;
+		GOLR D 0
+		{
+
+			//eject whatever is already loaded
+			for(int i=0;i<2;i++)
+			{
+				int chm=invoker.weaponstatus[OUSS_CHAMBER1+i];
+				bool ejected = false;	
+				// Spent shell.
+				if(chm==OUSS_SHELLSPENT)
+				{
+					A_SpawnItemEx("HDSpentShell",
+					cos(pitch)*5,0,height-7-sin(pitch)*5,
+					cos(pitch-45)*cos(angle+random(-2,2))*random(1,4)+vel.x,
+					cos(pitch-45)*sin(angle+random(-2,2))*random(1,4)+vel.y,
+					-sin(pitch-45)*random(1,4)+vel.z,
+					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+					ejected = true;
+				}
+				// Spent slug. 
+				else if(chm==OUSS_SLUGSPENT)
+				{
+					A_SpawnItemEx("HDSpentSlug",
+					cos(pitch)*5,0,height-7-sin(pitch)*5,
+					cos(pitch-45)*cos(angle+random(-2,2))*random(1,4)+vel.x,
+					cos(pitch-45)*sin(angle+random(-2,2))*random(1,4)+vel.y,
+					-sin(pitch-45)*random(1,4)+vel.z,
+					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+					ejected = true;
+				}
+				
+				if(ejected)
+					invoker.weaponstatus[OUSS_CHAMBER1+i]=0;
+			}
+						
+
+			switch(invoker.a_getreloadframe())
+			{
+				default:
+					setweaponstate("reloadstartA");
+					return;
+				case 1:
+					setweaponstate("reloadstartB");
+					return;
+				case 2:
+					setweaponstate("reloadstartC");
+					return;
+				case 3:
+					setweaponstate("reloadstartD");
+					return;
+			}
+		}
+	reloadstartA:
+			GOLR A 0;
+			goto reloadstartend;
+	reloadstartB:
+			GOLR B 0;
+			goto reloadstartend;
+	reloadstartC:
+			GOLR C 0;
+			goto reloadstartend;
+	reloadstartD:
+			GOLR D 0;
+			goto reloadstartend;
+	reloadstartend:
+		GOLR # 3
+		{
+				invoker.A_Open();
+		}
+		goto readyend;
+		
+	
+	// Actual reload actions.
+	// These don't check the player's inventory again,
+	// though if you somehow lose a shell in the 0 ticks it takes for
+	// these to run, hats off to you. 
+	reloadactual:
+		GOLR # 3 offset(0,36)
+		{
+			A_MuzzleClimb(
+			frandom(0.6,1.2)/2,frandom(0.6,1.2)/2,
+			frandom(0.6,1.2)/2,frandom(0.6,1.2)/2,
+			frandom(1.2,2.4)/2,frandom(1.2,2.4)/2
+			);
+			A_StartSound("weapons/ouopen");
+			invoker.A_FillSlot(OUSS_SHELL, pressingzoom());
+			invoker.owner.A_TakeInventory("HDShellAmmo", 1);
+		}
+		goto readyend;
+	altreloadactual:
+		GOLR # 3 offset(0,36)
+		{
+			A_MuzzleClimb(
+			frandom(0.6,1.2)/2,frandom(0.6,1.2)/2,
+			frandom(0.6,1.2)/2,frandom(0.6,1.2)/2,
+			frandom(1.2,2.4)/2,frandom(1.2,2.4)/2
+			);
+			A_StartSound("weapons/ouopen");
+			A_FillSlot(OUSS_SLUG, pressingzoom());
+			invoker.owner.A_TakeInventory("HDSlugAmmo", 1);
+		}
+		goto readyend;
+	
+	// Tapping the ejector.
+	// Lets you catch shells, like the slayer. 
+	unloadactual:
+		GOLR # 4 offset(0,46) A_MuzzleClimb(
+			frandom(0.6,1.2),frandom(0.6,1.2),
+			frandom(0.6,1.2),frandom(0.6,1.2),
+			frandom(1.2,2.4),frandom(1.2,2.4)
+		);
+		GOLR A 3 offset(0,36)
+		{
+			//eject whatever is already loaded
+			for(int i=0;i<2;i++)
+			{
+				int chm=invoker.weaponstatus[OUSS_CHAMBER1+i];
+				bool ejected = false;	
+				if(chm==OUSS_SHELL)
+				{
+					if(health<90&&countinv("IsMoving"))A_SpawnItemEx("HDFumblingShell",
+						cos(pitch)*5,-1,height-7-sin(pitch)*5,
+						cos(pitch-45)*cos(angle+random(-2,2))*random(1,4)+vel.x,
+						cos(pitch-45)*sin(angle+random(-2,2))*random(1,4)+vel.y,
+						-sin(pitch-45)*random(1,4)+vel.z,
+						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);else A_SpawnItemEx("HDUnspentShell",
+						cos(pitch)*5,0,height-7-sin(pitch)*5,
+						vel.x,vel.y,vel.z+1,
+						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+					ejected = true;
+				}
+				// Unspent Slug. 
+				else if(chm==OUSS_SLUG)
+				{
+					if(health<90&&countinv("IsMoving"))
+					{
+						A_SpawnItemEx("HDFumblingSlug",
+						cos(pitch)*5,-1,height-7-sin(pitch)*5,
+						cos(pitch-45)*cos(angle+random(-2,2))*random(1,4)+vel.x,
+						cos(pitch-45)*sin(angle+random(-2,2))*random(1,4)+vel.y,
+						-sin(pitch-45)*random(1,4)+vel.z,
+						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+					}
+					else
+					{
+						A_SpawnItemEx("HDUnspentSlug",
+						cos(pitch)*5,0,height-7-sin(pitch)*5,
+						vel.x,vel.y,vel.z+1,
+						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+					}
+					ejected = true;
+				}
+				// Spent shell.
+				else if(chm==OUSS_SHELLSPENT)
+				{
+					A_SpawnItemEx("HDSpentShell",
+					cos(pitch)*5,0,height-7-sin(pitch)*5,
+					cos(pitch-45)*cos(angle+random(-2,2))*random(1,4)+vel.x,
+					cos(pitch-45)*sin(angle+random(-2,2))*random(1,4)+vel.y,
+					-sin(pitch-45)*random(1,4)+vel.z,
+					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+					ejected = true;
+				}
+				// Spent slug. 
+				else if(chm==OUSS_SLUGSPENT)
+				{
+					A_SpawnItemEx("HDSpentSlug",
+					cos(pitch)*5,0,height-7-sin(pitch)*5,
+					cos(pitch-45)*cos(angle+random(-2,2))*random(1,4)+vel.x,
+					cos(pitch-45)*sin(angle+random(-2,2))*random(1,4)+vel.y,
+					-sin(pitch-45)*random(1,4)+vel.z,
+					0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
+					);
+					ejected = true;
+				}
+				
+				if(ejected)
+				{
+					A_StartSound("weapons/ouopen", CHAN_WEAPON, CHANF_OVERLAP);
+					invoker.weaponstatus[OUSS_CHAMBER1+i]=0;
+				}
+			}
+				
+		}
+		goto reloadloop;
+		
+	spawn:
+		GOLL N -1
+		{
+			if(invoker.isempty())
+			{
+				brollsprite=true;
+				brollcenter=true;
+				roll=2*90;
+			}
+			else
+			{
+				brollsprite=false;
+				brollcenter=false;
+				roll=0;
+			}
+		}
+		stop;
+	}
+	override void InitializeWepStats(bool idfa){
+		weaponstatus[OUSS_CHAMBER1]=OUSS_SHELL;
+		weaponstatus[OUSS_CHAMBER2]=OUSS_SHELL;
+		if(!idfa){
+			weaponstatus[OUSS_CHOKE1]=7;
+			weaponstatus[OUSS_CHOKE2]=7;
+		}
+		handshells=0;
+	}
+	override void loadoutconfigure(string input){
+		
+		if(getloadoutvar(input,"aslug") != -1)
+		{
+			weaponstatus[OUSS_CHAMBER1]=OUSS_SLUG;
+			weaponstatus[OUSS_CHAMBER2]=OUSS_SLUG;
+		}
+		else
+		{
+			if(getloadoutvar(input,"oslug") != -1 && getloadoutvar(input,"oslug") != 0)
+			{
+				weaponstatus[OUSS_CHAMBER1]=OUSS_SLUG;
+			}
+			if(getloadoutvar(input,"uslug") != -1 && getloadoutvar(input,"uslug") != 0)
+			{
+				weaponstatus[OUSS_CHAMBER2]=OUSS_SLUG;
+			}
+		}
+		int choke=min(getloadoutvar(input,"ochoke",1),7);
+		if(choke>=0)
+			weaponstatus[OUSS_CHOKE1]=choke;
+		choke=min(getloadoutvar(input,"uchoke",1),7);
+		if(choke>=0)
+			weaponstatus[OUSS_CHOKE2]=choke;
+	}
+}
+enum overunderstatus
+{
+	OUSF_UNLOADONLY=1,
+	OUSF_DOUBLE=2,
+	OUSF_FROMPOCKETS=4,
+	OUSS_CHAMBER1=1,
+	OUSS_CHAMBER2=2,
+	OUSS_CHOKE1=6,
+	OUSS_CHOKE2=7
+};
+
+enum overunderammo : int
+{
+	OUSS_SHELL=2,
+	OUSS_SHELLSPENT=1,
+	OUSS_SLUG=4,
+	OUSS_SLUGSPENT=3,
+};
