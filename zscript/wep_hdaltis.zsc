@@ -638,7 +638,7 @@ class HDAltis : HDShotgun
 		goto readyend;
 
 	flashleft:
-		GOLF A 1 bright
+		GOLF B 1 bright
 		{
 			// Codes for what bullets to fire. 
 			int tofiretop    = invoker.weaponstatus[OUSS_CHAMBER1];
@@ -666,7 +666,7 @@ class HDAltis : HDShotgun
 		}
 		goto flasheither;
 	flashright:
-		GOLF B 1 bright
+		GOLF A 1 bright
 		{
 			// Codes for what bullets to fire. 
 			int tofirebottom = invoker.weaponstatus[OUSS_CHAMBER2];
