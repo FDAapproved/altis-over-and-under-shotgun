@@ -528,12 +528,12 @@ class HDAltis : HDShotgun
 			bobb.y=clamp(bobb.y,-8,8);
 			vector2 moveoffset = (0, 5);
 			sb.drawimage(
-				"ouftst",(0,-4)+moveoffset+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
+				"ouftst",(0,-6)+moveoffset+bobb,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP,
 				alpha:0.9,scale:(1,1)
 			);
 			sb.SetClipRect(cx,cy,cw,ch);
 			sb.drawimage(
-				"oubkst",(0,0)+moveoffset+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
+				"oubkst",(0,-2)+moveoffset+bob,sb.DI_SCREEN_CENTER|sb.DI_ITEM_TOP
 			);
 		}
 	}
