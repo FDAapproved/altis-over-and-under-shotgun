@@ -167,13 +167,13 @@ class HDAltis : HDShotgun
 			// Quality of life reload-ends. 
 			if((justpressed(BT_RELOAD) && !(invoker.owner.countinv("HDShellammo"))) || (justpressed(BT_ALTRELOAD) && !(invoker.owner.countinv("HDSlugammo"))))
 			{
-				invoker.cooldown += 1;
+				invoker.cooldown += 2;
 				setweaponstate("reloadend");
 				return;
 			}
 			else if((justpressed(BT_RELOAD) || justpressed(BT_ALTRELOAD)) && !invoker.isnotfull())
 			{
-				invoker.cooldown += 1;
+				invoker.cooldown += 2;
 				setweaponstate("reloadend");
 				return;
 			}
@@ -181,7 +181,7 @@ class HDAltis : HDShotgun
 			// Revolver style reload end (allows slamfire). 
 			if(justpressed(BT_ATTACK) || justpressed(BT_ALTATTACK))
 			{
-				invoker.cooldown += 1;
+				invoker.cooldown += 2;
 				setweaponstate("reloadend");
 			}
 			// Shell reload.
