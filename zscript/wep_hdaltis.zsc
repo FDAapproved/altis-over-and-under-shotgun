@@ -152,6 +152,8 @@ class HDAltis : HDShotgun
 	// The readyweapon code used while you have the shotgun open. 
 	action void A_ReadyOpen()
 	{
+		bool forceslug   = !(bool(invoker.owner.countinv("HDShellammo"))) && bool(invoker.owner.countinv("HDSlugammo"))  && justpressed(BT_RELOAD);
+		bool forceshell  = !(bool(invoker.owner.countinv("HDSlugammo")))  && bool(invoker.owner.countinv("HDShellammo")) && justpressed(BT_ALTRELOAD);
 		
 		// Actual ready call.
 		A_WeaponReady(WRF_NOFIRE|WRF_ALLOWUSER3);
@@ -165,13 +167,20 @@ class HDAltis : HDShotgun
 		{
 			
 			// Quality of life reload-ends. 
-			if((justpressed(BT_RELOAD) && !(invoker.owner.countinv("HDShellammo"))) || (justpressed(BT_ALTRELOAD) && !(invoker.owner.countinv("HDSlugammo"))))
+			if
+			(
+			(justpressed(BT_RELOAD) && !(invoker.owner.countinv("HDShellammo")))
+			 &&
+			(justpressed(BT_ALTRELOAD) && !(invoker.owner.countinv("HDSlugammo")))
+			)
 			{
 				invoker.cooldown += 2;
 				setweaponstate("reloadend");
 				return;
 			}
-			else if((justpressed(BT_RELOAD) || justpressed(BT_ALTRELOAD)) && !invoker.isnotfull())
+
+			
+			if((justpressed(BT_RELOAD) || justpressed(BT_ALTRELOAD)) && !invoker.isnotfull())
 			{
 				invoker.cooldown += 2;
 				setweaponstate("reloadend");
@@ -183,9 +192,11 @@ class HDAltis : HDShotgun
 			{
 				invoker.cooldown += 2;
 				setweaponstate("reloadend");
+				return;
 			}
+			
 			// Shell reload.
-			else if(justpressed(BT_RELOAD))
+			if(justpressed(BT_RELOAD) || forceshell)
 			{
 				if(invoker.owner.countinv("HDShellammo") && invoker.isnotfull())
 				{
@@ -195,12 +206,14 @@ class HDAltis : HDShotgun
 						invoker.cooldown += 5;
 					}
 					setweaponstate("reloadactual");
+					return;
 				}
 				else
 					setweaponstate("nope");
 			}
 			// Slug reload.
-			else if(justpressed(BT_ALTRELOAD))
+			
+			if(justpressed(BT_ALTRELOAD) || forceslug)
 			{
 				if(invoker.owner.countinv("HDSlugammo") && invoker.isnotfull())
 				{
@@ -210,12 +223,13 @@ class HDAltis : HDShotgun
 						invoker.cooldown += 5;
 					}
 					setweaponstate("altreloadactual");
+					return;
 				}
 				else
 					setweaponstate("nope");
 			}
 			// Shell Ejection
-			else if(justpressed(BT_UNLOAD))
+			if(justpressed(BT_UNLOAD))
 			{
 				if(!invoker.cooldown)
 				{
