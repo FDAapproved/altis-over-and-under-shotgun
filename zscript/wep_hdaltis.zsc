@@ -121,6 +121,34 @@ class HDAltis : HDShotgun
 	}
 	
 	
+	// Assigns overlays their relevant sprite. 
+	// Invisible when false. 
+	action void A_ShellReady(int chamber)
+	{
+		let thissprite=player.getpsprite(OUSS_OVERBREACH+chamber);
+		switch(invoker.weaponstatus[chamber])
+		{
+		case OUSS_SLUG:
+		case OUSS_SLUGSPENT:
+			if(invoker.reloading)
+			{
+				thissprite.frame=3+chamber;
+				break;
+			}
+			else
+			{
+				thissprite.sprite=getspriteindex("TNT1A0");
+				thissprite.frame=0;
+				break;
+			}
+		default:
+			thissprite.sprite=getspriteindex("TNT1A0");
+			thissprite.frame=0;
+			break;
+		}
+	}
+	
+	
 	// The readyweapon code used while you have the shotgun open. 
 	action void A_ReadyOpen()
 	{
@@ -513,12 +541,17 @@ class HDAltis : HDShotgun
 	
 	states
 	{
-	
+
+	shellA:GOLR D 1 A_ShellReady(OUSS_CHAMBER1);wait;
+	shellB:GOLR D 1 A_ShellReady(OUSS_CHAMBER2);wait;
+
 		select0:
 			GOLL A 0
 			{
 				invoker.reloading=false;
 				invoker.swapbarrels=cvar.getcvar("hd_swapbarrels",player);
+				A_Overlay(OUSS_OVERBREACH+OUSS_CHAMBER1,"shellA");
+				A_Overlay(OUSS_OVERBREACH+OUSS_CHAMBER2,"shellB");
 			}
 			goto select0small;
 		
@@ -531,8 +564,9 @@ class HDAltis : HDShotgun
 				invoker.cooldown = 0;
 				if(invoker.reloading)
 				{
-					A_SetTics(8);
 					invoker.a_close();
+					A_SetTics(8);
+
 				}
 			}
 			goto deselect0small;
@@ -794,6 +828,7 @@ class HDAltis : HDShotgun
 	reloadend:
 		GOLL G 4 offset(0,46)
 		{
+			invoker.reloading = false;
 			if(invoker.owner.health < 70)
 			{
 				a_settics(6);
@@ -1095,7 +1130,9 @@ enum overunderstatus
 	OUSS_CHAMBER1=1,
 	OUSS_CHAMBER2=2,
 	OUSS_CHOKE1=6,
-	OUSS_CHOKE2=7
+	OUSS_CHOKE2=7,
+	// The layer overlays are drawn on + their chamber #.
+	OUSS_OVERBREACH=355
 };
 
 enum overunderammo : int
