@@ -1,1 +1,2 @@
 alias ous_reset_cvars "resetcvar ous_slug_chance_bias; resetcvar ous_weapon_spawn_bias"
+alias ous_reset_user  "resetcvar ous_unique_slug_noise; resetcvar ous_slayer_hud;"
