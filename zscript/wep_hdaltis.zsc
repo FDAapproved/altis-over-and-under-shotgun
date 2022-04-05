@@ -430,11 +430,11 @@ class HDAltis : HDShotgun
 		if(sb.hudlevel==1)
 		{
 		
-			sb.drawimage("SLG1A0",(-59,-10),sb.DI_SCREEN_CENTER_BOTTOM);
-			sb.drawnum(hpl.countinv("HDSlugAmmo"),-58,-8,sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawimage("SLG1A0",(-38,-25),sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawnum(hpl.countinv("HDSlugAmmo"),-37,-25,sb.DI_SCREEN_CENTER_BOTTOM);
 			
-			sb.drawimage("SHL1A0",(-47,-10),sb.DI_SCREEN_CENTER_BOTTOM);
-			sb.drawnum(hpl.countinv("HDShellAmmo"),-46,-8,sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawimage("SHL1A0",(-38,-10),sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawnum(hpl.countinv("HDShellAmmo"),-37,-8,sb.DI_SCREEN_CENTER_BOTTOM);
 		}
 		int loffs=-31;int rofs=-18;
 		if(hdw.weaponstatus[0]&OUSF_DOUBLE){
