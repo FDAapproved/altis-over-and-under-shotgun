@@ -1,4 +1,5 @@
 // hide-ous, truly. 
 server int  ous_weapon_spawn_bias = 4;
 server int  ous_slug_chance_bias  = 4;
-user bool ous_unique_slug_noise = false;
+user bool   ous_unique_slug_noise = false;
+user bool   ous_slayer_hud        = false;

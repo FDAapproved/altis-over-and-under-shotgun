@@ -12,6 +12,12 @@ class HDAltis : HDShotgun
 	// For whether or not the weapon is open.
 	bool reloading;
 	
+	// Will the real slim slayer please stand up (please stand up)?
+	bool notslayer;
+
+	// see above. 
+	transient cvar notslayercvar;
+	
 	// barrelswap, maps just like the slayer's. 
 	transient cvar swapbarrels;
 
@@ -436,6 +442,82 @@ class HDAltis : HDShotgun
 			sb.drawimage("SHL1A0",(-38,-10),sb.DI_SCREEN_CENTER_BOTTOM);
 			sb.drawnum(hpl.countinv("HDShellAmmo"),-37,-8,sb.DI_SCREEN_CENTER_BOTTOM);
 		}
+		
+		
+		if(notslayer)
+		{
+			int loffs=-18;int rofs=-7;
+			if(hdw.weaponstatus[0]&OUSF_DOUBLE){
+				loffs=-15;rofs=-11;
+				sb.drawimage("STBURAUT",(-16,-10),sb.DI_SCREEN_CENTER_BOTTOM);
+			}
+			
+			int chambertop    = hdw.weaponstatus[OUSS_CHAMBER1];
+			int chamberbottom = hdw.weaponstatus[OUSS_CHAMBER2];
+			if(!(chambertop%2))
+			{
+				switch(chambertop)
+				{
+					case OUSS_SHELL:
+						sb.drawrect(-21,loffs + 2,1,1);
+						sb.drawrect(-21,loffs,1,1);
+						sb.drawrect(-22,loffs + 1,1,1);
+						sb.drawrect(-23,loffs + 2,1,1);
+						sb.drawrect(-23,loffs,1,1);
+						sb.drawrect(-24,loffs + 1,1,1);
+						sb.drawrect(-25,loffs + 2,1,1);
+						sb.drawrect(-25,loffs,1,1);
+						
+						// base
+						sb.drawrect(-28, loffs,2,3);
+						break;
+						
+					case OUSS_SLUG:
+						// base
+						sb.drawrect(-28,loffs,2,3);
+						
+						sb.drawrect(-25,loffs,5,3);
+						break;
+				}
+			}
+			else if(chambertop>0)
+			{
+				sb.drawrect(-28, loffs,2,3);
+			}
+
+			if(!(chamberbottom%2))
+			{
+				switch(chamberbottom)
+				{
+					case OUSS_SHELL:
+						sb.drawrect(-21,rofs + 2,1,1);
+						sb.drawrect(-21,rofs,1,1);
+						sb.drawrect(-22,rofs + 1,1,1);
+						sb.drawrect(-23,rofs + 2,1,1);
+						sb.drawrect(-23,rofs,1,1);
+						sb.drawrect(-24,rofs + 1,1,1);
+						sb.drawrect(-25,rofs + 2,1,1);
+						sb.drawrect(-25,rofs,1,1);
+						
+						// Base
+						sb.drawrect(-28,rofs,2,3);
+						break;
+						
+					case OUSS_SLUG:
+						sb.drawrect(-28,rofs,2,3);
+						// Base
+						sb.drawrect(-25,rofs,5,3);
+						break;
+				}
+
+			}
+			else if(chamberbottom>0)
+			{
+				sb.drawrect(-28, rofs,2,3);
+			}
+		}
+		else
+		{
 		int loffs=-31;int rofs=-18;
 		if(hdw.weaponstatus[0]&OUSF_DOUBLE){
 			loffs=-27;rofs=-23;
@@ -449,21 +531,19 @@ class HDAltis : HDShotgun
 			switch(chambertop)
 			{
 				case OUSS_SHELL:
-					sb.drawrect(loffs + 2,-15,1,1);
 					sb.drawrect(loffs,-15,1,1);
+					sb.drawrect(loffs + 2,-15,1,1);
 					sb.drawrect(loffs + 1,-14,1,1);
-					sb.drawrect(loffs + 2,-13,1,1);
 					sb.drawrect(loffs,-13,1,1);
+					sb.drawrect(loffs + 2,-13,1,1);
 					sb.drawrect(loffs + 1,-12,1,1);
-					sb.drawrect(loffs + 2,-11,1,1);
 					sb.drawrect(loffs,-11,1,1);
-					sb.drawrect(loffs + 1,-10,1,1);
+					sb.drawrect(loffs + 2,-11,1,1);
 					sb.drawrect(loffs,-9,3,2);
 					break;
 				case OUSS_SLUG:
 					sb.drawrect(loffs,-15,3,5);
 					sb.drawrect(loffs,-9,3,2);
-					sb.drawrect(loffs+1,-16,1,1);
 					break;
 			}
 		}
@@ -477,21 +557,23 @@ class HDAltis : HDShotgun
 			switch(chamberbottom)
 			{
 				case OUSS_SHELL:
-					sb.drawrect(rofs + 2,-15,1,1);
+					//sb.drawrect(rofs,-15,3,5);
+					
 					sb.drawrect(rofs,-15,1,1);
+					sb.drawrect(rofs + 2,-15,1,1);
 					sb.drawrect(rofs + 1,-14,1,1);
-					sb.drawrect(rofs + 2,-13,1,1);
 					sb.drawrect(rofs,-13,1,1);
+					sb.drawrect(rofs + 2,-13,1,1);
 					sb.drawrect(rofs + 1,-12,1,1);
-					sb.drawrect(rofs + 2,-11,1,1);
 					sb.drawrect(rofs,-11,1,1);
-					sb.drawrect(rofs + 1,-10,1,1);
+					sb.drawrect(rofs + 2,-11,1,1);
+					
+					// Base
 					sb.drawrect(rofs,-9,3,2);
 					break;
 				case OUSS_SLUG:
 					sb.drawrect(rofs,-15,3,5);
 					sb.drawrect(rofs,-9,3,2);
-					sb.drawrect(rofs+1,-16,1,1);
 					break;
 			}
 
@@ -499,6 +581,7 @@ class HDAltis : HDShotgun
 		else if(chamberbottom>0)
 		{
 			sb.drawrect(rofs,-9,3,2);
+		}
 		}
 	}
 	
@@ -585,6 +668,8 @@ class HDAltis : HDShotgun
 				invoker.reloading=false;
 				invoker.swapbarrels=cvar.getcvar("hd_swapbarrels",player);
 				invoker.swapsounds =cvar.getcvar("ous_unique_slug_noise",player);
+				invoker.notslayercvar=cvar.getcvar("ous_slayer_hud",player);
+				invoker.notslayer = !(invoker.notslayercvar.getint());
 				A_Overlay(OUSS_OVERBREACH+OUSS_CHAMBER1,"shellA");
 				A_Overlay(OUSS_OVERBREACH+OUSS_CHAMBER2,"shellB");
 			}
