@@ -439,7 +439,7 @@ class HDAltis : HDShotgun
 			sb.drawimage("SLG1A0",(-38,-25),sb.DI_SCREEN_CENTER_BOTTOM);
 			sb.drawnum(hpl.countinv("HDSlugAmmo"),-37,-25,sb.DI_SCREEN_CENTER_BOTTOM);
 			
-			sb.drawimage("SHL1A0",(-38,-10),sb.DI_SCREEN_CENTER_BOTTOM);
+			sb.drawimage("SHL1A0",(-38,-8),sb.DI_SCREEN_CENTER_BOTTOM);
 			sb.drawnum(hpl.countinv("HDShellAmmo"),-37,-8,sb.DI_SCREEN_CENTER_BOTTOM);
 		}
 		
