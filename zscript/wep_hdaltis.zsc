@@ -449,7 +449,15 @@ class HDAltis : HDShotgun
 			switch(chambertop)
 			{
 				case OUSS_SHELL:
-					sb.drawrect(loffs,-15,3,5);
+					sb.drawrect(loffs + 2,-15,1,1);
+					sb.drawrect(loffs,-15,1,1);
+					sb.drawrect(loffs + 1,-14,1,1);
+					sb.drawrect(loffs + 2,-13,1,1);
+					sb.drawrect(loffs,-13,1,1);
+					sb.drawrect(loffs + 1,-12,1,1);
+					sb.drawrect(loffs + 2,-11,1,1);
+					sb.drawrect(loffs,-11,1,1);
+					sb.drawrect(loffs + 1,-10,1,1);
 					sb.drawrect(loffs,-9,3,2);
 					break;
 				case OUSS_SLUG:
@@ -469,7 +477,15 @@ class HDAltis : HDShotgun
 			switch(chamberbottom)
 			{
 				case OUSS_SHELL:
-					sb.drawrect(rofs,-15,3,5);
+					sb.drawrect(rofs + 2,-15,1,1);
+					sb.drawrect(rofs,-15,1,1);
+					sb.drawrect(rofs + 1,-14,1,1);
+					sb.drawrect(rofs + 2,-13,1,1);
+					sb.drawrect(rofs,-13,1,1);
+					sb.drawrect(rofs + 1,-12,1,1);
+					sb.drawrect(rofs + 2,-11,1,1);
+					sb.drawrect(rofs,-11,1,1);
+					sb.drawrect(rofs + 1,-10,1,1);
 					sb.drawrect(rofs,-9,3,2);
 					break;
 				case OUSS_SLUG:
