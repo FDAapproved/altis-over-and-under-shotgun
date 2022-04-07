@@ -3,6 +3,24 @@
  Sourced from [Gollgagh's O/U shotgun.](https://forum.zdoom.org/viewtopic.php?t=59120)
 # Compat
 This add-on requires bullet-lib (the Hideous Destructor ammunition library) to function.
+# Features
+This mod includes the following modules:
+```
+- Altis Shotgun (weapon),
+- Altis O/U Menu (see GZDoom options), 
+	+ spawn rate and user cvars contained within.
+```
+# CVARS
+```
+ous_weapon_spawn_bias, 4,  "1 in 5"
+- (set to 0 to replace all, -1 to disable),
+ous_slug_chance_bias,  4,  "1 in 5"
+- (set to 0 to replace all, -1 to disable),
+ous_unique_slug_noise, false
+- (set to true to use a unique slug sound),
+ous_slayer_hud,        false
+- (set to true to use a hud akin to the slayer's). 
+```
 # Weapon Description
 ```
 Name:           "Altis" over-and-under shotgun,
