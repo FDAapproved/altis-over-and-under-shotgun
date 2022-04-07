@@ -14,7 +14,7 @@ Sprite Credits
 	GOLFA...C,
 	GOLRA...D:
 	GOLRE,  F: - FDA, suggested by Khan on the HDDiscord,
-		- Gollgagh, Batandy, TerminusEst, FDA (GOLR edits). 
+		- Gollgagh, Batandy, TerminusEst, FDA (GOLR and GOLLN edits). 
 		- https://forum.zdoom.org/viewtopic.php?t=59120
 --------------------------------------------------------------------------------
 Sound Credits

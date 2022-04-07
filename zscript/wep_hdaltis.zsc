@@ -172,6 +172,7 @@ class HDAltis : HDShotgun
 		if(invoker.cooldown>0)
 		{
 			invoker.cooldown--;
+			if(hd_debug)invoker.owner.A_log("[Altis] Held Cooldown: "..invoker.cooldown);
 		}
 		else
 		{
@@ -1004,7 +1005,15 @@ class HDAltis : HDShotgun
 		GOLL K 2 offset(0,34);
 		GOLL K 1 offset(0,40);
 		GOLL G 3 offset(0,46);
-		GOLL G 10 offset(0,47) A_StartSound("weapons/oucrack",8);
+		// Originally 10 ticks.
+		GOLL G 5 offset(0,47)
+		{
+			if(invoker.owner.health < 60)
+			{
+				a_settics(10);
+			}
+			A_StartSound("weapons/oucrack",8);
+		}
 		GOLR A 0;
 		GOLR B 0;
 		GOLR C 0;
@@ -1075,7 +1084,8 @@ class HDAltis : HDShotgun
 			GOLR D 0;
 			goto reloadstartend;
 	reloadstartend:
-		GOLR # 3
+		// Originally 3 ticks.
+		GOLR # 0
 		{
 				invoker.A_Open();
 		}
@@ -1230,18 +1240,18 @@ class HDAltis : HDShotgun
 	}
 	override void loadoutconfigure(string input){
 		
-		if(getloadoutvar(input,"aslug") != -1)
+		if(getloadoutvar(input,"aslug") > 0)
 		{
 			weaponstatus[OUSS_CHAMBER1]=OUSS_SLUG;
 			weaponstatus[OUSS_CHAMBER2]=OUSS_SLUG;
 		}
 		else
 		{
-			if(getloadoutvar(input,"oslug") != -1 && getloadoutvar(input,"oslug") != 0)
+			if(getloadoutvar(input,"oslug") > 0)
 			{
 				weaponstatus[OUSS_CHAMBER1]=OUSS_SLUG;
 			}
-			if(getloadoutvar(input,"uslug") != -1 && getloadoutvar(input,"uslug") != 0)
+			if(getloadoutvar(input,"uslug") > 0)
 			{
 				weaponstatus[OUSS_CHAMBER2]=OUSS_SLUG;
 			}
