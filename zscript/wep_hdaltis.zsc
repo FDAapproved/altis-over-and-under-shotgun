@@ -173,6 +173,16 @@ class HDAltis : HDShotgun
 		{
 			invoker.cooldown--;
 			if(hd_debug)invoker.owner.A_log("[Altis] Held Cooldown: "..invoker.cooldown);
+			
+			if(invoker.cooldown <= 7)
+			{
+				if((justpressed(BT_RELOAD) || justpressed(BT_ALTRELOAD) || justpressed(BT_ATTACK) || justpressed(BT_ALTATTACK)) && !invoker.isnotfull())
+				{
+					invoker.cooldown = 2;
+					setweaponstate("reloadend");
+					return;
+				}
+			}
 		}
 		else
 		{
