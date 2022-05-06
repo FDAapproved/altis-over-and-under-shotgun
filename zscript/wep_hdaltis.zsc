@@ -188,17 +188,16 @@ class HDAltis : HDShotgun
 		{
 			
 			// Quality of life reload-ends. 
-			if
-			(
-			(justpressed(BT_RELOAD) && !(invoker.owner.countinv("HDShellammo")))
-			 &&
-			(justpressed(BT_ALTRELOAD) && !(invoker.owner.countinv("HDSlugammo")))
+			bool outofammopressed = justpressed(BT_ALTRELOAD) || justpressed(BT_RELOAD);
+			if(((outofammopressed && !(invoker.owner.countinv("HDShellammo"))) && ((outofammopressed && !(invoker.owner.countinv("HDSlugammo")))))
 			)
 			{
 				invoker.cooldown += 2;
 				setweaponstate("reloadend");
 				return;
 			}
+
+
 
 			
 			if((justpressed(BT_RELOAD) || justpressed(BT_ALTRELOAD)) && !invoker.isnotfull())
