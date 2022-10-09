@@ -220,7 +220,7 @@ class HDAltis : HDShotgun
 			{
 				if(invoker.owner.countinv("HDShellammo") && invoker.isnotfull())
 				{
-					invoker.cooldown += 15;
+					invoker.cooldown += 10;
 					if(invoker.owner.health < 70)
 					{
 						invoker.cooldown += 5;
@@ -237,7 +237,7 @@ class HDAltis : HDShotgun
 			{
 				if(invoker.owner.countinv("HDSlugammo") && invoker.isnotfull())
 				{
-					invoker.cooldown += 15;
+					invoker.cooldown += 10;
 					if(invoker.owner.health < 70)
 					{
 						invoker.cooldown += 5;
@@ -253,7 +253,7 @@ class HDAltis : HDShotgun
 			{
 				if(!invoker.cooldown)
 				{
-					invoker.cooldown += 25;
+					invoker.cooldown += 20;
 					setweaponstate("unloadactual");
 				}
 				else
