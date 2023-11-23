@@ -710,7 +710,15 @@ class HDAltis : HDShotgun
 	ready:
 		GOLL # 0 A_JumpIf(invoker.reloading, "reloadloop");
 		GOLL # 1
-		{	
+		{
+		// For saves. All cvars get unset when one does, so we only need to check one.
+		if(invoker.swapbarrels == null)
+		{
+			invoker.swapbarrels=cvar.getcvar("hd_swapbarrels",player);
+			invoker.swapsounds =cvar.getcvar("ous_unique_slug_noise",player);
+			invoker.notslayercvar=cvar.getcvar("ous_slayer_hud",player);
+			invoker.notslayer = !(invoker.notslayercvar.getint());
+		}
 			
 			if(invoker.cooldown > 0)
 			{
