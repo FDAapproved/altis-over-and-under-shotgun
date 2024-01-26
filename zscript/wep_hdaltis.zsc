@@ -434,8 +434,6 @@ class HDAltis : HDShotgun
 
 	static float GetZofs(actor caller, int barreladjust)
 	{
-		// Matt what the actual fuck is this zofs calculation; this is like ten things in one line.
-		// Stop doing this. 
 		let result = HDWeapon.GetShootOffset
 		(
 			caller,
