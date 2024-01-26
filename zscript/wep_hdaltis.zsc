@@ -39,13 +39,13 @@ class HDAltis : HDShotgun
 		weapon.selectionorder 31;
 		weapon.slotnumber 3;
 		weapon.slotpriority 1;
-		inventory.pickupmessage "You got the Altis!";
-		obituary "By Zeus; %k, %o is over (and under (the ground)).";
+		inventory.pickupmessage "$PICKUP_ALTIS";
+		obituary "$OB_ALTIS";
 		weapon.bobrangex 0.18;
 		weapon.bobrangey 0.7;
 		scale 0.6;
 		hdweapon.barrelsize 30,1,1;
-		tag "over-and-under shotgun";
+		tag "$TAG_ALTIS";
 		hdweapon.refid "ous";
 		
 		// Loadout info string. Comment this out for older HD versions to run.
@@ -324,12 +324,12 @@ class HDAltis : HDShotgun
 			{
 				if(tofiretop==OUSS_SHELL)
 				{
-					Fire(caller, 0, choke);
+					Fire(caller, 0, choke, 1);
 					weaponstatus[OUSS_CHAMBER1] -= 1;
 				}
 				else if(tofiretop==OUSS_SLUG)
 				{
-					FireSlug(caller, 0, choke);
+					Fire(caller, 0, choke, 0);
 					weaponstatus[OUSS_CHAMBER1] -= 1;
 				}
 			}
@@ -337,12 +337,12 @@ class HDAltis : HDShotgun
 			{
 				if(tofirebottom==OUSS_SHELL)
 				{
-					Fire(caller, 1, choke);
+					Fire(caller, 1, choke, 0);
 					weaponstatus[OUSS_CHAMBER2] -= 1;
 				}
 				else if(tofirebottom==OUSS_SLUG)
 				{
-					FireSlug(caller, 1, choke);
+					Fire(caller, 1, choke, 1);
 					weaponstatus[OUSS_CHAMBER2] -= 1;
 				}
 			}
@@ -350,94 +350,100 @@ class HDAltis : HDShotgun
 
 
 	
-	// Fires slugs. More or less a carbon copy of the slayer's firecode.
+	// Fires anything in a hull. More or less a carbon copy of the slayer's firecode.
 	// The altis has a hardcoded accuracy modifier, it's twice as accurate. 
-	static void FireSlug(actor caller,bool top,int choke=7)
+	static void Fire(actor caller,bool top,int choke=7, int firecode=0)
 	{
-		double shotpower=getshotpower();
-		double spread=3.;
-		double speedfactor=1.2;
+		// This is a string so gzdoom doesn't complain if a class doesn't exist,
+		// though I think most shotgun shells are in bulletlib anyway. 
+		string bullettype   = "HDB_Slug";
+		bool   bullethaswad = false; // technically always true because doom is a wa-
+		int    bulletamount = 1;
+		double shotpower    = getshotpower();
+		double spread       = 3.;
+		double speedfactor  = 1.2;
+		float  barreladjust = 1.1;
 		let sss=HDAltis(caller.findinventory("HDAltis"));
-		if(sss){
-			choke=sss.weaponstatus[top?OUSS_CHOKE2:OUSS_CHOKE1];
-			sss.shotpower=shotpower;
+		
+		switch(firecode)
+		{
+			// Slugs.
+			case 0:
+				bullettype   = "HDB_Slug";
+				bullethaswad = false;
+				bulletamount = 1;
+			
+			// Buckshot.
+			case 1:
+				bullettype   = "HDB_00";
+				bullethaswad = true; // when you has wad.
+				bulletamount = 10;
+			
+			// We'll never actually land here. Maybe raise an error if so?
+			default:
+				break;
 		}
-
-		choke=clamp(choke,0,7);
-		spread=6.5-0.5*choke;
-		speedfactor=1.+0.02857*choke;
-
-		spread*=shotpower;
-		speedfactor*=shotpower;
-		int barreladjust=2;
-		if(top)barreladjust=-barreladjust;
 		
-		// Here is where the bullet actor decision would go. 
-		let p=HDBulletActor.FireBullet(
-		caller,
-		"HDB_Slug",
-			zofs:
-			HDWeapon.GetShootOffset(
-			caller,caller.player
-			&&!!hdweapon(caller.player.readyweapon)
-			?hdweapon(caller.player.readyweapon).barrellength:36
-			) + barreladjust,
-			spread:spread*0.5,
-			speedfactor:speedfactor,amount:1
-		);
-		distantnoise.make(p,"world/oufar");
-	}
-
-	
-	// Fires shells. More or less a carbon copy of the slayer's firecode.
-	// The altis has a hardcoded accuracy modifier, it's twice as accurate. 
-	static void Fire(actor caller,bool top,int choke=7)
-	{
-		double shotpower=getshotpower();
-		double spread=3.;
-		double speedfactor=1.2;
-		
-		// Checks if the caller has the weapon. 
-		let sss=HDAltis(caller.findinventory("HDAltis"));
+		// Set Choke
 		if(sss)
 		{
 			choke=sss.weaponstatus[top?OUSS_CHOKE2:OUSS_CHOKE1];
 			sss.shotpower=shotpower;
 		}
 		choke=clamp(choke,0,7);
+		
+		// Set Spread
 		spread=6.5-0.5*choke;
-		speedfactor=1.+0.02857*choke;
-
 		spread*=shotpower;
+		spread*=0.5; // bonuses are halved (IE, doubled). 
+		
+		// Set speed factor.
+		speedfactor=1.+0.02857*choke;
 		speedfactor*=shotpower;
 		
-		int barreladjust=2;
-		if(top)barreladjust=-barreladjust;
 		
-		// Here is where the bullet actor decision would go. 
-		HDBulletActor.FireBullet(
-		caller,"HDB_wad",
-			zofs:
-			HDWeapon.GetShootOffset(
-			caller,caller.player
-			&&!!hdweapon(caller.player.readyweapon)
-			?hdweapon(caller.player.readyweapon).barrellength:36
-			) + barreladjust,
-			spread:spread*0.5);
-		let p=HDBulletActor.FireBullet(
-		caller,"HDB_00",
-			zofs:
-			HDWeapon.GetShootOffset(
-			caller,caller.player
-			&&!!hdweapon(caller.player.readyweapon)
-			?hdweapon(caller.player.readyweapon).barrellength:36
-			) + barreladjust,
-			spread:spread*0.5,
-			speedfactor:speedfactor,amount:10
+		// Determine which barrel to fire from. 
+		if(top)
+		{
+			barreladjust=-barreladjust; // invert the bonus if so. 
+		}
+		
+		// Fire a wad if the shell is meant to have one.
+		if(bullethaswad)
+		{
+			HDBulletActor.FireBullet
+			(
+				caller,
+				"HDB_wad",
+				zofs:GetZofs(caller, barreladjust),
+				spread:spread
+			);
+		}
+		
+		// Fire the bullet's spread of payload.
+		let p=HDBulletActor.FireBullet
+		(
+			caller,
+			bullettype,
+			zofs:GetZofs(caller, barreladjust),
+			spread:spread,
+			speedfactor:speedfactor,amount:bulletamount
 		);
 		distantnoise.make(p,"world/oufar");
 	}
-	
+
+	static float GetZofs(actor caller, int barreladjust)
+	{
+		// Matt what the actual fuck is this zofs calculation; this is like ten things in one line.
+		// Stop doing this. 
+		let result = HDWeapon.GetShootOffset
+		(
+			caller,
+			caller.player&&!!hdweapon(caller.player.readyweapon)?hdweapon(caller.player.readyweapon).barrellength:36
+		) + barreladjust;
+		return result;
+	}
+
 	// Altis has no unique sprites or saddles.
 	override string,double getpickupsprite(){return "GOLLN".."0",1.;}
 	
@@ -598,23 +604,31 @@ class HDAltis : HDShotgun
 	// Helptext for when the breach is open and closed. 
 	override string gethelptext()
 	{
+		LocalizeHelp();
+		// From the slayer, for reference. 
+		// 1, localized variable
+		// 2, call to stringtable function,
+		// 3, appended section. 
+		// 1-------------2----------------------------------3----------------------------------
+		// LWPHELP_FIRE..StringTable.Localize("$SLAWH_FIRE")..weaponstatus[SLAYS_CHOKE1]..")\n"
+		
 		if(!reloading)
 		{
 			return
-			WEPHELP_FIRE.."  Shoot Over (choke: "..weaponstatus[OUSS_CHOKE1]..")\n"
-			..WEPHELP_ALTFIRE.."  Shoot Under (choke: "..weaponstatus[OUSS_CHOKE2]..")\n"
-			..WEPHELP_FIREMODE.."  Hold to force double shot\n"
-			..WEPHELP_RELOAD..", "..WEPHELP_ALTRELOAD..", "..WEPHELP_UNLOAD..", "" Open breach"
+			LWPHELP_FIRE..StringTable.Localize("$ALTISWH_FIRE")..weaponstatus[OUSS_CHOKE1]..")\n"
+			..LWPHELP_ALTFIRE..StringTable.Localize("$ALTISWH_ALTFIRE")..weaponstatus[OUSS_CHOKE2]..")\n"
+			..LWPHELP_FIREMODE..StringTable.Localize("$ALTISWH_FIREMODE")
+			..LWPHELP_RELOAD..", "..LWPHELP_ALTRELOAD..", "..LWPHELP_UNLOAD..", "..StringTable.Localize("$ALTISWH_OPEN")
 			;
 		}
 		else
 		{
 			return
-			WEPHELP_FIRE..", "..WEPHELP_ALTFIRE.."  Close breach\n"
-			..WEPHELP_RELOAD.."  Reload w/ shells\n"
-			..WEPHELP_ALTRELOAD.."  Reload w/ slugs\n"
-			..WEPHELP_ZOOM.." Hold to load underbarrel first\n"
-			..WEPHELP_UNLOAD.." Eject unspent shells"
+			LWPHELP_FIRE..", "..LWPHELP_ALTFIRE..StringTable.Localize("$ALTISWH_CLOSE")
+			..LWPHELP_RELOAD..StringTable.Localize("$ALTISWH_OPEN_RELOAD")
+			..LWPHELP_ALTRELOAD..StringTable.Localize("$ALTISWH_OPEN_ALTRELOAD")
+			..LWPHELP_ZOOM..StringTable.Localize("$ALTISWH_OPEN_ZOOM")
+			..LWPHELP_UNLOAD..StringTable.Localize("$ALTISWH_OPEN_UNLOAD")
 			;
 		}
 	}

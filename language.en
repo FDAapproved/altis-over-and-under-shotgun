@@ -1,0 +1,19 @@
+[en enc eng eni ena enz default]
+// Weapon Tags.
+TAG_ALTIS        = "over-and-under shotgun";
+PICKUP_ALTIS     = "You got the Altis!";
+OB_ALTIS         = "By Zeus; %k, %o is over (and under (the ground)).";
+
+// Weapon help text.
+
+// Normal,
+ALTISWH_FIRE        = "  Shoot Over (choke: ";
+ALTISWH_ALTFIRE     = "  Shoot Under (choke: ";
+ALTISWH_FIREMODE    = "  Hold to force double shot\n";
+ALTISWH_OPEN        = "  Open breach";
+// Open.
+ALTISWH_CLOSE          = "  Close breach\n";
+ALTISWH_OPEN_RELOAD    = "  Reload w/ shells\n";
+ALTISWH_OPEN_ALTRELOAD = "  Reload w/ slugs\n";
+ALTISWH_OPEN_ZOOM      = "  Hold to load underbarrel first\n";
+ALTISWH_OPEN_UNLOAD    = "  Eject unspent shells";
