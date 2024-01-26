@@ -53,7 +53,7 @@ OptionValue "SpawnBias"
 
 
 
-AddOptionMenu "OptionsMenu"
+AddOptionMenu "HDAddonMenu"
 {
 	Submenu "Altis O/U Options", "OverUnderShotgun"
 }
