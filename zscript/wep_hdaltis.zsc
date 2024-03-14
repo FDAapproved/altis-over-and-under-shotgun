@@ -306,9 +306,11 @@ class HDAltis : HDShotgun
 				case 0:
 					firetop=true;
 					break;
+					
 				case 1:
 					firebottom=true;
 					break;
+					
 				case 2:
 					firetop=true;
 					firebottom=true;
@@ -324,25 +326,26 @@ class HDAltis : HDShotgun
 			{
 				if(tofiretop==OUSS_SHELL)
 				{
-					Fire(caller, 0, choke, 1);
+					Fire(caller, false, choke, 1);
 					weaponstatus[OUSS_CHAMBER1] -= 1;
 				}
 				else if(tofiretop==OUSS_SLUG)
 				{
-					Fire(caller, 0, choke, 0);
+					Fire(caller, false, choke, 0);
 					weaponstatus[OUSS_CHAMBER1] -= 1;
 				}
 			}
+			
 			if(firebottom)
 			{
 				if(tofirebottom==OUSS_SHELL)
 				{
-					Fire(caller, 1, choke, 0);
+					Fire(caller, true, choke, 1);
 					weaponstatus[OUSS_CHAMBER2] -= 1;
 				}
 				else if(tofirebottom==OUSS_SLUG)
 				{
-					Fire(caller, 1, choke, 1);
+					Fire(caller, true, choke, 0);
 					weaponstatus[OUSS_CHAMBER2] -= 1;
 				}
 			}
@@ -352,7 +355,7 @@ class HDAltis : HDShotgun
 	
 	// Fires anything in a hull. More or less a carbon copy of the slayer's firecode.
 	// The altis has a hardcoded accuracy modifier, it's twice as accurate. 
-	static void Fire(actor caller,bool top,int choke=7, int firecode=0)
+	static void Fire(actor caller, bool top, int choke=7, int firecode=0)
 	{
 		// This is a string so gzdoom doesn't complain if a class doesn't exist,
 		// though I think most shotgun shells are in bulletlib anyway. 
@@ -370,14 +373,16 @@ class HDAltis : HDShotgun
 			// Slugs.
 			case 0:
 				bullettype   = "HDB_Slug";
-				bullethaswad = false;
+				bullethaswad = true;
 				bulletamount = 1;
+				break;
 			
 			// Buckshot.
 			case 1:
 				bullettype   = "HDB_00";
 				bullethaswad = true; // when you has wad.
 				bulletamount = 10;
+				break;
 			
 			// We'll never actually land here. Maybe raise an error if so?
 			default:
