@@ -11,12 +11,12 @@ OptionMenu OverUnderShotgun
    	StaticText ""
 	StaticText "Shotguns", 1
     StaticText  "Control the replacement-rate of ssgs.                 ", "white"
-	Option "Replacement Rate: ", "ous_weapon_spawn_bias", "SpawnBias"
+	ScaleSlider "Replacement Rate: ", "ous_weapon_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
 	SafeCommand "Reset spawn options", "resetcvar ous_weapon_spawn_bias"
 	StaticText ""
 	StaticText "Slugs", 1
     StaticText  "Control the chance of alternate ammo spawns (slugs).  ", "white"
-	Option "Slug Spawn Rate: ", "ous_slug_chance_bias", "SpawnBias"
+	ScaleSlider "Slug Spawn Rate: ", "ous_slug_chance_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
 	SafeCommand "Reset slug spawn options", "resetcvar ous_slug_chance_bias"
  	StaticText ""
  	StaticText ""
@@ -32,26 +32,6 @@ OptionMenu OverUnderShotgun
 	SafeCommand "Reset spawn options    ", "ous_reset_cvars"
 	SafeCommand "Reset user  options    ", "ous_reset_user"
 }
-
-
-
-OptionValue "SpawnBias"
-{
-	-1,    "Disabled"
-	 0,    "Replace All"
-	 2,    "1 in 3"
-	 4,    "1 in 5"
-	 9,    "1 in 10"
-	 14,   "1 in 15"
-	 19,   "1 in 20"
-	 24,   "1 in 25"
-	 49,   "1 in 50"
-	 99,   "1 in 100"
-	 149,  "1 in 150"
-	 199,  "1 in 200"
-}
-
-
 
 AddOptionMenu "HDAddonMenu"
 {
