@@ -1,4 +1,12 @@
 [en enc eng eni ena enz default]
+
+
+// Menu Option Values
+MENU_ENABLED    = "Enabled";
+MENU_DISABLED   = "Disabled";
+MENU_REPLACEALL = "Replace All";
+MENU_WITHALL    = "With All";
+
 // Weapon Tags.
 TAG_ALTIS        = "over-and-under shotgun";
 PICKUP_ALTIS     = "You got the Altis!";
