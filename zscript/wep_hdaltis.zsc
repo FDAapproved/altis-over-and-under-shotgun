@@ -221,10 +221,6 @@ class HDAltis : HDShotgun
 				if(invoker.owner.countinv("HDShellammo") && invoker.isnotfull())
 				{
 					invoker.cooldown += 10;
-					if(invoker.owner.health < 70)
-					{
-						invoker.cooldown += 5;
-					}
 					setweaponstate("reloadactual");
 					return;
 				}
@@ -238,10 +234,6 @@ class HDAltis : HDShotgun
 				if(invoker.owner.countinv("HDSlugammo") && invoker.isnotfull())
 				{
 					invoker.cooldown += 10;
-					if(invoker.owner.health < 70)
-					{
-						invoker.cooldown += 5;
-					}
 					setweaponstate("altreloadactual");
 					return;
 				}
@@ -996,24 +988,10 @@ class HDAltis : HDShotgun
 		GOLL G 4 offset(0,46)
 		{
 			invoker.reloading = false;
-			if(invoker.owner.health < 70)
-			{
-				a_settics(6);
-			}
 		}
-		GOLL G 2 offset(0,42)
-		{
-			if(invoker.owner.health < 70)
-			{
-				a_settics(4);
-			}
-		}
+		GOLL G 2 offset(0,42);
 		GOLL A 6 offset(0,42)
 		{
-			if(invoker.owner.health < 70)
-			{
-				a_settics(8);
-			}
 			A_MuzzleClimb(
 			-frandom(0.6,1.2)/2,-frandom(0.6,1.2)/2,
 			-frandom(0.6,1.2)/2,-frandom(0.6,1.2)/2,
@@ -1040,14 +1018,7 @@ class HDAltis : HDShotgun
 		GOLL K 1 offset(0,40);
 		GOLL G 3 offset(0,46);
 		// Originally 10 ticks.
-		GOLL G 5 offset(0,47)
-		{
-			if(invoker.owner.health < 60)
-			{
-				a_settics(10);
-			}
-			A_StartSound("weapons/oucrack",8);
-		}
+		GOLL G 5 offset(0,47) A_StartSound("weapons/oucrack",8);
 		GOLR A 0;
 		GOLR B 0;
 		GOLR C 0;
@@ -1174,13 +1145,7 @@ class HDAltis : HDShotgun
 				bool ejected = false;	
 				if(chm==OUSS_SHELL)
 				{
-					if(health<90&&countinv("IsMoving"))A_SpawnItemEx("HDFumblingShell",
-						cos(pitch)*5,-1,height-7-sin(pitch)*5,
-						cos(pitch-45)*cos(angle+random(-2,2))*random(1,4)+vel.x,
-						cos(pitch-45)*sin(angle+random(-2,2))*random(1,4)+vel.y,
-						-sin(pitch-45)*random(1,4)+vel.z,
-						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
-					);else A_SpawnItemEx("HDUnspentShell",
+					A_SpawnItemEx("HDUnspentShell",
 						cos(pitch)*5,0,height-7-sin(pitch)*5,
 						vel.x,vel.y,vel.z+1,
 						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
@@ -1190,24 +1155,11 @@ class HDAltis : HDShotgun
 				// Unspent Slug. 
 				else if(chm==OUSS_SLUG)
 				{
-					if(health<90&&countinv("IsMoving"))
-					{
-						A_SpawnItemEx("HDFumblingSlug",
-						cos(pitch)*5,-1,height-7-sin(pitch)*5,
-						cos(pitch-45)*cos(angle+random(-2,2))*random(1,4)+vel.x,
-						cos(pitch-45)*sin(angle+random(-2,2))*random(1,4)+vel.y,
-						-sin(pitch-45)*random(1,4)+vel.z,
-						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
-					);
-					}
-					else
-					{
 						A_SpawnItemEx("HDUnspentSlug",
 						cos(pitch)*5,0,height-7-sin(pitch)*5,
 						vel.x,vel.y,vel.z+1,
 						0,SXF_ABSOLUTEMOMENTUM|SXF_NOCHECKPOSITION|SXF_TRANSFERPITCH
 					);
-					}
 					ejected = true;
 				}
 				// Spent shell.
