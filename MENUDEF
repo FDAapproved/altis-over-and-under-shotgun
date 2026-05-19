@@ -11,14 +11,18 @@ OptionMenu OverUnderShotgun
    	StaticText ""
 	StaticText "Shotguns", 1
     StaticText  "Control the replacement-rate of ssgs.                 ", "white"
-	ScaleSlider "Replacement Rate: ", "ous_weapon_spawn_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	Slider "Replacement Rate: ", "ous_weapon_spawn_bias", 0.0, 100, .01, 2
 	SafeCommand "Reset spawn options", "resetcvar ous_weapon_spawn_bias"
 	StaticText ""
 	StaticText "Slugs", 1
     StaticText  "Control the chance of alternate ammo spawns (slugs).  ", "white"
-	ScaleSlider "Slug Spawn Rate: ", "ous_slug_chance_bias", -1, 999, 1, "$MENU_REPLACEALL", "$MENU_DISABLED"
+	Slider "Slug Spawn Rate: ", "ous_slug_chance_bias", 0.0, 100, .01, 2
 	SafeCommand "Reset slug spawn options", "resetcvar ous_slug_chance_bias"
  	StaticText ""
+	StaticText "Backpacks", "cyan"
+	StaticText "Control whether the Altis spawns in Backpacks.         ", "white"
+	Option "Allowed in Ammo Boxes and/or Backpacks: ", "ous_allowBackpacks", "OnOff"
+	StaticText ""
  	StaticText ""
 	StaticText "User Options", "cyan"
  	StaticText ""

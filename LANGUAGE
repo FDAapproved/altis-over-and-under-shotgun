@@ -25,3 +25,10 @@ ALTISWH_OPEN_RELOAD    = "  Reload w/ shells\n";
 ALTISWH_OPEN_ALTRELOAD = "  Reload w/ slugs\n";
 ALTISWH_OPEN_ZOOM      = "  Hold to load underbarrel first\n";
 ALTISWH_OPEN_UNLOAD    = "  Eject unspent shells";
+
+// Merchant Store Entries
+
+// Altis O/U Shotgun
+MERCH_CAT_ALTIS    = "FDA Approved";
+MERCH_TAG_ALTIS    = "Altis Over-and-Under Shotgun";
+MERCH_FLAVOR_ALTIS = "It's like the Slayer, but vertical.";

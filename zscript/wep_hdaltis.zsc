@@ -1318,3 +1318,37 @@ enum overunderammo : int
 	OUSS_SLUG=4,
 	OUSS_SLUGSPENT=3,
 };
+
+// Random classes with ammo boxes. 
+class WildAltisSlugs : IdleDummy
+{
+	states
+	{
+		Spawn:
+			TNT1 A 0 NODELAY
+			{
+				let weapon = HDWeapon(Actor.Spawn("hdaltis", (invoker.pos.x, invoker.pos.y, invoker.pos.z + 5)));
+				// Filled with slugs. 
+				if(weapon)
+				{
+					weapon.weaponstatus[1]=4;
+					weapon.weaponstatus[2]=4;
+				}
+				SlugBoxPickup(Actor.Spawn("SlugBoxPickup", (invoker.pos.x, invoker.pos.y, invoker.pos.z + 5)));
+			}
+			stop;
+	}
+}
+class WildAltisShells : IdleDummy
+{
+	states
+	{
+		Spawn:
+			TNT1 A 0 NODELAY
+			{
+				let weapon = Actor.Spawn("hdaltis", (invoker.pos.x, invoker.pos.y, invoker.pos.z + 5));
+				ShellBoxPickup(Actor.Spawn("ShellBoxPickup", (invoker.pos.x, invoker.pos.y, invoker.pos.z + 5)));
+			}
+			stop;
+	}
+}

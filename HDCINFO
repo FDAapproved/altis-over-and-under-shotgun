@@ -1,0 +1,17 @@
+// Backpack Spawn Pool Filtering
+addStorageItemListFilter => { "name": "HDAltis", "allowed": "#ous_allowBackpacks" }
+
+// Wild Altis O/U Spawn Table
+addSpawnTableNestedEntry => { "tableName": "SuperShotgunReplaces", "name": "WildAltis", "weight": "#ous_weapon_spawn_bias", "persists": "true" }
+addSpawnTableSingleEntry => { "tableName": "WildAltis", "name": "WildAltisSlugs", "weight": "#ous_slug_chance_bias", "persists": "true" }
+addSpawnTableSingleEntry => { "tableName": "WildAltis", "name": "WildAltisShells", "persists": "true" }
+
+// Altis O/U Ammo Usage
+addAmmoUser => { "ammoName": "HDShellAmmo", "name": "HDAltis" }
+addAmmoUser => { "ammoName": "HDSlugAmmo", "name": "HDAltis" }
+
+// AceCorp Weapon Crate Spawn Pool Filtering
+addWeaponCrateFilter => { "name": "HDAltis", "allowed": "#ous_allowBackpacks" }
+
+// Merchant Store Entries
+newMerchantStoreItem => { "enabled": "#hdm_enable_altis", "type": "weapon", "category": "$MERCH_CAT_ALTIS", "item": "HDAltis", "icon": "GOLLN0", "displayName": "$MERCH_TAG_ALTIS", "basePrice": "150", "flavorText": "$MERCH_FLAVOR_ALTIS" }
